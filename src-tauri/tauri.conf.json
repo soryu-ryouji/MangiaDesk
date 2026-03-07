@@ -12,13 +12,13 @@
   "app": {
     "windows": [
       {
-        "title": "mangiadesk",
-        "width": 800,
-        "height": 600
+        "title": "Mangia Desktop",
+        "width": 1366,
+        "height": 720
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self' http://192.168.31.123:5999; img-src 'self' http://192.168.31.123:5999 data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval'; connect-src 'self' http://192.168.31.123:5999"
     }
   },
   "bundle": {

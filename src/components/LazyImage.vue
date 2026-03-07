@@ -4,7 +4,7 @@
     <div v-if="isLoading && showSkeleton" class="skeleton" :style="skeletonStyle">
       <div class="skeleton-shimmer"></div>
     </div>
-    
+
     <!-- 纯色占位（不显示骨架动画时） -->
     <div v-else-if="isLoading && !showSkeleton" class="placeholder-solid" :style="skeletonStyle"></div>
 

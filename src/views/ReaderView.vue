@@ -320,7 +320,7 @@ const preloadCount = ref(5)
 const preloader = new SmartPreloader({
   cacheSize: 15,
   preloadAhead: preloadCount.value,
-  preloadBehind: 1
+  preloadBehind: 50
 })
 
 // 图片加载状态跟踪
