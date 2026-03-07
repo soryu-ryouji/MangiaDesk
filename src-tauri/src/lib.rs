@@ -1,6 +1,8 @@
 mod api;
 mod discovery;
 
+
+
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -9,15 +11,15 @@ fn greet(name: &str) -> String {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    discovery::spawn_discovery_task();
-
     tauri::Builder::default()
-        .setup(|_app| {
-            discovery::spawn_discovery_task(); // 启动 UDP 发现
-            Ok(())
-        })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_http::init())
+        .setup(|app| {
+            // 应用启动时启动 UDP 自发现服务
+            let app_handle = app.handle().clone();
+            discovery::spawn_discovery_task(app_handle);
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             greet,
             api::get_manga_list,
