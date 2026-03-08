@@ -4,15 +4,8 @@
     <h3>⚙️ 阅读设置</h3>
 
     <div class="setting-group">
-      <div class="setting-item">
-        <label>阅读模式</label>
-        <select v-model="readingModeModel">
-          <option value="page">翻页模式</option>
-          <option value="webtoon">条漫模式</option>
-        </select>
-      </div>
 
-      <div class="setting-item" v-if="readingMode === 'page'">
+      <div class="setting-item">
         <label>页面排列</label>
         <select v-model="pageLayoutModel">
           <option value="single">单页</option>
@@ -70,7 +63,6 @@ import { computed } from 'vue'
 
 const props = defineProps({
   showSettings: { type: Boolean, default: false },
-  readingMode: { type: String, required: true },
   pageLayout: { type: String, required: true },
   clickNavigation: { type: Boolean, required: true },
   showKeyboardHint: { type: Boolean, required: true },
@@ -79,18 +71,12 @@ const props = defineProps({
 })
 
 const emit = defineEmits([
-  'update:readingMode',
   'update:pageLayout',
   'update:clickNavigation',
   'update:showKeyboardHint',
   'update:fitMode',
   'update:preloadCount'
 ])
-
-const readingModeModel = computed({
-  get: () => props.readingMode,
-  set: (v) => emit('update:readingMode', v)
-})
 const pageLayoutModel = computed({
   get: () => props.pageLayout,
   set: (v) => emit('update:pageLayout', v)

@@ -14,10 +14,9 @@
     </div>
 
     <!-- 阅读区域 -->
-    <div
-      class="reader-content"
+    <div class="reader-content"
       @click="handleClick"
-      :class="[readingMode, { 'double-page': isDoublePageMode }]"
+      :class="{ 'double-page': isDoublePageMode }"
     >
       <div v-if="loading" class="loading">
         <div class="spinner"></div>
@@ -30,130 +29,65 @@
       </div>
 
       <div v-else-if="chapterDetail" class="pages-container">
-        <!-- 翻页模式 -->
-        <template v-if="readingMode === 'page'">
-          <div class="page-wrapper" :class="{ 'double': isDoublePageMode }">
-            <!-- 双页模式 -->
-            <template v-if="isDoublePageMode">
-              <div class="double-page-container">
-                <!-- 左页 (偶数页在当前页右边) -->
-                <div v-if="showLeftPage" class="page-slot left" :class="{ 'loading': isImageLoading(leftPageImage) }">
-                  <img
-                    v-if="leftPageImage"
-                    :src="leftPageImage"
-                    alt="Left Page"
-                    class="manga-page"
-                    @load="onImageLoad(leftPageImage)"
-                    @error="onImageError"
-                  />
-                  <div v-if="isImageLoading(leftPageImage)" class="image-loading">
-                    <div class="spinner small"></div>
-                  </div>
-                </div>
-                <div v-else class="page-slot left placeholder"></div>
+        <!-- 页面展示区 -->
+        <div class="page-wrapper" :class="{ 'double': isDoublePageMode }">
+          <DoublePageMode v-if="isDoublePageMode"
+            :show-left-page="showLeftPage"
+            :show-right-page="showRightPage"
+            :left-page-image="leftPageImage"
+            :right-page-image="rightPageImage"
+            :is-image-loading="isImageLoading"
+            @image-load="onImageLoad"
+            @image-error="onImageError"
+            />
+          <SinglePageMode v-else
+            :current-page-image="currentPageImage"
+            :current-page="currentPage"
+            :is-image-loading="isImageLoading"
+            @image-load="onImageLoad"
+            @image-error="onImageError"
+            />
+        </div>
 
-                <!-- 右页 (奇数页) -->
-                <div v-if="showRightPage" class="page-slot right" :class="{ 'loading': isImageLoading(rightPageImage) }">
-                  <img
-                    v-if="rightPageImage"
-                    :src="rightPageImage"
-                    alt="Right Page"
-                    class="manga-page"
-                    @load="onImageLoad(rightPageImage)"
-                    @error="onImageError"
-                  />
-                  <div v-if="isImageLoading(rightPageImage)" class="image-loading">
-                    <div class="spinner small"></div>
-                  </div>
-                </div>
-              </div>
-            </template>
+        <!-- 翻页导航 -->
+        <div class="page-navigation" :class="{ 'hidden': !showToolbar }">
+          <button
+            class="nav-btn prev"
+            :disabled="!canGoPrev"
+            @click.stop="prevPage"
+          >
+            ← 上一页
+          </button>
 
-            <!-- 单页模式 -->
-            <template v-else>
-              <div class="single-page-container" :class="{ 'loading': isImageLoading(currentPageImage) }">
-                <img
-                  v-if="currentPageImage"
-                  :src="currentPageImage"
-                  :alt="`Page ${currentPage}`"
-                  class="manga-page single"
-                  @load="onImageLoad(currentPageImage)"
-                  @error="onImageError"
-                />
-                <div v-if="isImageLoading(currentPageImage)" class="image-loading">
-                  <div class="spinner small"></div>
-                </div>
-              </div>
-            </template>
+          <!-- 页面跳转 -->
+          <div class="page-jumper">
+            <input
+              v-model.number="jumpPage"
+              type="number"
+              min="1"
+              :max="totalPages"
+              class="page-input"
+              @keyup.enter="goToPage"
+            />
+            <span class="page-separator">/</span>
+            <span class="total-pages">{{ totalPages }}</span>
+            <button class="go-btn" @click.stop="goToPage">GO</button>
           </div>
 
-          <!-- 翻页导航 -->
-          <div class="page-navigation" :class="{ 'hidden': !showToolbar }">
-            <button
-              class="nav-btn prev"
-              :disabled="!canGoPrev"
-              @click.stop="prevPage"
-            >
-              ← 上一页
-            </button>
-
-            <!-- 页面跳转 -->
-            <div class="page-jumper">
-              <input
-                v-model.number="jumpPage"
-                type="number"
-                min="1"
-                :max="totalPages"
-                class="page-input"
-                @keyup.enter="goToPage"
-              />
-              <span class="page-separator">/</span>
-              <span class="total-pages">{{ totalPages }}</span>
-              <button class="go-btn" @click.stop="goToPage">GO</button>
-            </div>
-
-            <button
-              class="nav-btn next"
-              :disabled="!canGoNext"
-              @click.stop="nextPage"
-            >
-              下一页 →
-            </button>
-          </div>
-        </template>
-
-        <!-- 条漫模式 -->
-        <template v-else-if="readingMode === 'webtoon'">
-          <div class="webtoon-container">
-            <div
-              v-for="(url, index) in visibleWebtoonPages"
-              :key="index"
-              class="webtoon-item"
-              :data-index="index"
-            >
-              <LazyImage
-                :src="url"
-                :alt="`Page ${index + 1}`"
-                :aspect-ratio="'auto'"
-                img-class="manga-page webtoon"
-                :eager="index < 3"
-                @loaded="onWebtoonImageLoaded(index)"
-              />
-            </div>
-            <div ref="webtoonSentinel" class="webtoon-sentinel"></div>
-          </div>
-          <div class="webtoon-end">
-            <p>— 本章完 —</p>
-            <button class="back-btn" @click="goBack">返回目录</button>
-          </div>
-        </template>
+          <button
+            class="nav-btn next"
+            :disabled="!canGoNext"
+            @click.stop="nextPage"
+          >
+            下一页 →
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- 设置面板 -->
     <ReaderSettings
       :show-settings="showSettings"
-      v-model:reading-mode="readingMode"
       v-model:page-layout="pageLayout"
       v-model:click-navigation="clickNavigation"
       v-model:show-keyboard-hint="showKeyboardHint"
@@ -167,7 +101,7 @@
     </button>
 
     <!-- 页面导航按钮 (悬浮) -->
-    <div v-if="readingMode === 'page'" class="floating-nav">
+    <div class="floating-nav">
       <button
         class="float-btn prev"
         :class="{ 'hidden': !showToolbar }"
@@ -217,9 +151,10 @@
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { getChapterDetail } from '../api/manga'
-import { SmartPreloader } from '../utils/imageLoader.js'
-import LazyImage from '../components/LazyImage.vue'
+import { SmartPreloader } from '../utils/imageLoader'
 import ReaderSettings from '../components/reader/ReaderSettings.vue'
+import SinglePageMode from '../components/reader/modes/SinglePageMode.vue'
+import DoublePageMode from '../components/reader/modes/DoublePageMode.vue'
 
 const props = defineProps({
   mangaName: {
@@ -240,7 +175,6 @@ const currentPage = ref(1)
 const showToolbar = ref(true)
 const showSettings = ref(false)
 const isHoveringToolbar = ref(false)
-const readingMode = ref('page') // 'page' 或 'webtoon'
 const pageLayout = ref('single') // 'single' 或 'double'
 const clickNavigation = ref(true)
 const showKeyboardHint = ref(true)
@@ -258,12 +192,7 @@ const preloader = new SmartPreloader({
 // 图片加载状态跟踪
 const imageLoadingStates = ref(new Map())
 
-// 条漫模式相关
-const webtoonVisibleRange = ref({ start: 0, end: 5 })
-const webtoonSentinel = ref(null)
-let webtoonObserver = null
-
-const isDoublePageMode = computed(() => readingMode.value === 'page' && pageLayout.value === 'double')
+const isDoublePageMode = computed(() => pageLayout.value === 'double')
 
 const totalPages = computed(() => {
   return chapterDetail.value?.page_urls?.length || 0
@@ -347,11 +276,6 @@ const preloadProgress = computed(() => {
   return total > 0 ? Math.min(cached / total, 1) : 1
 })
 
-// 条漫模式可见页面
-const visibleWebtoonPages = computed(() => {
-  const { start, end } = webtoonVisibleRange.value
-  return pageUrls.value.slice(start, end)
-})
 
 // 检查图片是否正在加载
 const isImageLoading = (url) => {
@@ -385,7 +309,7 @@ const loadChapter = async () => {
 
 // 更新预加载
 const updatePreload = () => {
-  if (readingMode.value !== 'page' || !pageUrls.value.length) return
+  if (!pageUrls.value.length) return
 
   // 更新预加载器配置
   preloader.preloadAhead = preloadCount.value
@@ -408,37 +332,6 @@ const onImageLoad = (url) => {
 // 图片加载失败
 const onImageError = (e) => {
   e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="140"><rect fill="%23333" width="100" height="140"/><text fill="%23888" x="50" y="70" text-anchor="middle" font-size="12">加载失败</text></svg>'
-}
-
-// 条漫图片加载完成
-const onWebtoonImageLoaded = (index) => {
-  // 可以在这里更新加载状态
-}
-
-// 设置条漫模式的 Intersection Observer
-const setupWebtoonObserver = () => {
-  if (readingMode.value !== 'webtoon' || !webtoonSentinel.value) return
-
-  if (webtoonObserver) {
-    webtoonObserver.disconnect()
-  }
-
-  webtoonObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        // 加载更多图片
-        const newEnd = Math.min(webtoonVisibleRange.value.end + 3, pageUrls.value.length)
-        if (newEnd > webtoonVisibleRange.value.end) {
-          webtoonVisibleRange.value.end = newEnd
-        }
-      }
-    })
-  }, {
-    rootMargin: '200px',
-    threshold: 0
-  })
-
-  webtoonObserver.observe(webtoonSentinel.value)
 }
 
 const goBack = () => {
@@ -468,7 +361,7 @@ const goToPage = () => {
 }
 
 const handleClick = (e) => {
-  if (!clickNavigation.value || readingMode.value === 'webtoon') return
+  if (!clickNavigation.value) return
 
   // 阻止默认行为，防止图片被选中变蓝
   e.preventDefault()
@@ -538,16 +431,6 @@ watch(preloadCount, () => {
   updatePreload()
 })
 
-// 监听阅读模式变化
-watch(readingMode, (mode) => {
-  if (mode === 'webtoon') {
-    webtoonVisibleRange.value = { start: 0, end: 5 }
-    nextTick(() => {
-      setupWebtoonObserver()
-    })
-  }
-})
-
 // 同步跳转页码
 watch(currentPage, (newVal) => {
   jumpPage.value = newVal
@@ -561,9 +444,6 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
   preloader.clear()
-  if (webtoonObserver) {
-    webtoonObserver.disconnect()
-  }
 })
 </script>
 
@@ -927,32 +807,6 @@ onUnmounted(() => {
 
 .go-btn:hover {
   background-color: #c73e54;
-}
-
-/* 条漫容器 */
-.webtoon-container {
-  padding: 20px;
-  min-height: 100%;
-}
-
-.webtoon-item {
-  margin-bottom: 0;
-}
-
-.webtoon-sentinel {
-  height: 50px;
-  margin-top: 20px;
-}
-
-.webtoon-end {
-  text-align: center;
-  padding: 60px 20px;
-  color: #888;
-}
-
-.webtoon-end p {
-  font-size: 1.2rem;
-  margin-bottom: 20px;
 }
 
 .back-btn {
