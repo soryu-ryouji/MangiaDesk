@@ -1,5 +1,6 @@
 mod api;
 mod discovery;
+mod image_cache;
 
 
 
@@ -25,7 +26,9 @@ pub fn run() {
             api::get_manga_list,
             api::get_manga_info,
             api::get_chapter_detail,
-            api::get_discovered_server
+            api::get_discovered_server,
+            image_cache::preload_images,
+            image_cache::get_image_bytes,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

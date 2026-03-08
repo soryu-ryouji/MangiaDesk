@@ -123,12 +123,12 @@ const startLoading = async () => {
 
   try {
     if (props.preload) {
-      // 等待预加载完成
-      await preloadImage(props.src)
+      const result = await preloadImage(props.src)
+      actualSrc.value = result?.blobUrl || props.src
+    } else {
+      actualSrc.value = props.src
     }
-    actualSrc.value = props.src
   } catch {
-    // 即使预加载失败，也尝试直接加载
     actualSrc.value = props.src
   }
 }
